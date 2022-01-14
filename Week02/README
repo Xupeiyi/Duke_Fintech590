@@ -1,0 +1,4 @@
+The written answer and code for week2 project can be found in Week2_Project.ipynb. Week2_Project.pdf is a pdf file with the same content.
+Dependencies on third-party libraries can be found in requirements.txt. If needed, please use "pip install -r requirements.txt" to install them. 
+
+ Week2_Project_slide.pptx only covered the first problem. I've done my best...
