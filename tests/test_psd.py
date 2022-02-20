@@ -1,6 +1,7 @@
 from unittest import TestCase, main
 import numpy as np
 
+from febrisk.stats import manhattan_distance
 from febrisk.psd import is_psd, near_psd, nearest_psd
 
 
@@ -36,13 +37,13 @@ class NearPsdTest(TestCase):
     def test_result_is_the_same_with_lecture_code(self):
         non_psd = a_non_psd_matrix(5)
         result = near_psd(non_psd)
-        answer =  np.array([[1.0,       0.735701,  0.899997,  0.899997,  0.899997],
+        answer = np.array([[1.0,       0.735701,  0.899997,  0.899997,  0.899997],
                             [0.735701,  1.0,       0.899997,  0.899997,  0.899997],
                             [0.899997,  0.899997,  1.0,       0.9,       0.9],
                             [0.899997,  0.899997,  0.9,       1.0,       0.9],
                             [0.899997,  0.899997,  0.9,       0.9,       1.0]])
-        difference = abs(result - answer).sum()
-        self.assertAlmostEqual(0, difference, delta=1e-5)
+
+        self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-5)
 
     def test_result_is_psd(self):
         pass
@@ -53,14 +54,13 @@ class NearestPsdTest(TestCase):
     def test_result_is_the_same_with_lecture_code(self):
         non_psd = a_non_psd_matrix(5)
         result = nearest_psd(non_psd)
-        answer = np.array([[1.0     ,  0.735704,  0.899998,  0.899998,  0.899998],
-                           [0.735704,  1.0     ,  0.899998,  0.899998,  0.899998],
-                           [0.899998,  0.899998,  1.0     ,  0.900001,  0.900001],
-                           [0.899998,  0.899998,  0.900001,  1.0     ,  0.900001],
-                           [0.899998,  0.899998,  0.900001,  0.900001,  1.0     ]])
+        answer = np.array([[1.0,       0.735704,  0.899998,  0.899998,  0.899998],
+                           [0.735704,  1.0,       0.899998,  0.899998,  0.899998],
+                           [0.899998,  0.899998,  1.0,       0.900001,  0.900001],
+                           [0.899998,  0.899998,  0.900001,  1.0,       0.900001],
+                           [0.899998,  0.899998,  0.900001,  0.900001,  1.0]])
         
-        difference = abs(result - answer).sum()
-        self.assertAlmostEqual(0, difference, delta=1e-5)
+        self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-5)
     
     def test_result_is_psd(self):
         pass
@@ -68,4 +68,4 @@ class NearestPsdTest(TestCase):
    
 if __name__ == '__main__':
     main()
-        
+

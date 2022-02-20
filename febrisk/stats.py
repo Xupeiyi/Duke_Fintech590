@@ -1,6 +1,10 @@
 import numpy as np
 
 
+def manhattan_distance(arr):
+    return np.abs(arr).sum()
+
+
 def frobenius_norm(matrix):
     """
     The Frobenius Norm of matrix A is 
@@ -10,7 +14,7 @@ def frobenius_norm(matrix):
 
 
 # =================================
-# Expotentially Weighted Covariance
+# Exponentially Weighted Covariance
 # =================================
 
 
@@ -45,3 +49,49 @@ def cal_ewcov(data: np.matrix, lambda_: float):
 
     # apply the weights to the deviation
     return deviation @ np.diag(weights) @ deviation.T
+
+
+# ===========================================
+# Principal Component Analysis
+# ============================================
+class PCA:
+    """
+    Apply PCA to a n*n covariance matrix sigma.
+    """
+    
+    def __init__(self, sigma, delta=1e-8):
+        eig_vals, eig_vecs = np.linalg.eigh(sigma)
+       
+        # only keep positive eigen values and vectors
+        is_positive = eig_vals > delta
+        eig_vals = eig_vals[is_positive]  # eigen values can have very tiny imaginary parts
+        eig_vecs = eig_vecs[:, is_positive]
+        
+        # sort the eigen values and eigen vectors in a descending order
+        desc_ranking = np.argsort(eig_vals)[::-1]
+        self._eig_vals = eig_vals[desc_ranking]
+        self._eig_vecs = eig_vecs[:, desc_ranking]
+        
+        # calculate explained variance ratio (evr)
+        self._evr = self._eig_vals / self._eig_vals.sum()
+        
+        # set the last value to 1 to eliminate rounding errors of floating point numbers
+        self._cumulative_evr = self._evr.cumsum()
+        self._cumulative_evr[-1] = 1
+        
+    @property
+    def explained_variance(self):
+        return self._eig_vals
+    
+    @property
+    def explained_variance_ratio(self):
+        return self._evr
+    
+    @property
+    def cumulative_evr(self):
+        return self._cumulative_evr
+    
+    @property
+    def eig_vecs(self):
+        return self._eig_vecs
+    
