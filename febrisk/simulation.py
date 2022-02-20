@@ -1,5 +1,9 @@
+from bisect import bisect_left
+
 import scipy
 import numpy as np
+
+from febrisk.stats import PCA
 
 
 def chol_psd(sigma):
@@ -41,3 +45,28 @@ class CholeskySimulator:
         return self.root @ scipy.random.randn(self.root.shape[1], nsample)
 
 
+class PCASimulator:
+    
+    def __init__(self, sigma):
+        self.pca = PCA(sigma)
+
+    def factorize(self, explained, verbose):
+        explained = min(explained, 1)
+        explained = max(explained, 0)
+        
+        # find the index of the minimum cumulative_evr
+        # that is greater than or equals to explained
+        idx = bisect_left(self.pca.cumulative_evr, explained)
+        eig_vals = self.pca.explained_variance[:idx+1]
+        eig_vecs = self.pca.eig_vecs[:, :idx+1]
+        
+        if verbose:
+            print(f"{self.pca.cumulative_evr[idx]*100:.2f}% total variance explained.\n" +
+                  f"{idx+1} eigen value(s) are used.")
+        
+        return eig_vecs @ np.diag(np.sqrt(eig_vals))
+        
+    def simulate(self, nsample, explained=1, verbose=False):
+        L = self.factorize(explained, verbose)
+        Z = scipy.random.randn(L.shape[1], nsample)
+        return L @ Z
