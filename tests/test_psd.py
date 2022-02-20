@@ -20,7 +20,7 @@ def a_psd_matrix(size):
     return mat
 
 
-class TestIsPsd(TestCase):
+class IsPsdTest(TestCase):
 
     def test_return_false_for_non_psd(self):
         non_psd = a_non_psd_matrix(10)
@@ -31,7 +31,7 @@ class TestIsPsd(TestCase):
         self.assertTrue(is_psd(psd))
 
 
-class TestNearPsd(TestCase):
+class NearPsdTest(TestCase):
 
     def test_result_is_the_same_with_lecture_code(self):
         non_psd = a_non_psd_matrix(5)
@@ -48,7 +48,7 @@ class TestNearPsd(TestCase):
         pass
 
 
-class TestNearestPsd(TestCase):
+class NearestPsdTest(TestCase):
 
     def test_result_is_the_same_with_lecture_code(self):
         non_psd = a_non_psd_matrix(5)
