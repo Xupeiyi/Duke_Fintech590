@@ -1,5 +1,35 @@
 import numpy as np
 
+# ==========================
+# Covariances
+# ==========================
+
+
+def cal_std(cov):
+    """Calculate the standard deviations with a covariance matrix."""
+    return np.sqrt(np.diag(cov))
+
+
+def cal_corr(cov):
+    """Calculate the correlation matrix with a covariance matrix."""
+    std = cal_std(cov)
+    inversed_std = np.diag(1 / std)
+    corr = inversed_std @ cov @ inversed_std
+    return corr
+
+
+def cal_cov(corr, std):
+    """
+    Calculate the covariance matrix with a correlation matrix
+    and a standard deviations array.
+    """
+    std = np.diag(std)
+    return std @ corr @ std
+
+# ==================================
+# Matrix's Norms
+# ==================================
+
 
 def manhattan_distance(arr):
     return np.abs(arr).sum()
@@ -94,4 +124,3 @@ class PCA:
     @property
     def eig_vecs(self):
         return self._eig_vecs
-    
