@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 import scipy.stats
-from febrisk.distfit import TFitter
+from febrisk.dist_fit import TFitter
 
 
 class TFitterTest(TestCase):

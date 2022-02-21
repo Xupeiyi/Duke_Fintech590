@@ -48,7 +48,7 @@ class MLEDistFitter:
     
 class TFitter(MLEDistFitter):
     """
-    Fit the data using a t distribution.
+    Fit a t distribution to the data.
     """
     constraints = ({"type": "ineq", "fun": lambda x: x[1]},  # the degree of freedom of t distribution is positive
                    {"type": "ineq", "fun": lambda x: x[2]})  # the scale parameter is also positive
@@ -60,3 +60,9 @@ class TFitter(MLEDistFitter):
         """
         return scipy.stats.t(loc=loc, df=df, scale=scale)
 
+
+class NormalFitter(MLEDistFitter):
+    """
+    Fit a normal distribution to the data.
+    """
+    pass
