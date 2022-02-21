@@ -1,10 +1,9 @@
 import numpy as np
 
+
 # ==========================
 # Covariances
 # ==========================
-
-
 def cal_std(cov):
     """Calculate the standard deviations with a covariance matrix."""
     return np.sqrt(np.diag(cov))
@@ -26,11 +25,10 @@ def cal_cov(corr, std):
     std = np.diag(std)
     return std @ corr @ std
 
+
 # ==================================
 # Matrix's Norms
 # ==================================
-
-
 def manhattan_distance(arr):
     return np.abs(arr).sum()
 
@@ -46,13 +44,11 @@ def frobenius_norm(matrix):
 # =================================
 # Exponentially Weighted Covariance
 # =================================
-
-
 def exponential_weights(lambda_: float, nlags: int) -> np.array:
     """
     Calculate the weights from T = t-1 to t-nlags if current period is T = t.
     """
-    weights = np.array([(1-lambda_) * (lambda_**(lag-1)) for lag in range(1, nlags+1)])
+    weights = np.array([(1 - lambda_) * (lambda_ ** (lag - 1)) for lag in range(1, nlags + 1)])
     weights /= weights.sum()  # normalized weights
     return weights
 
@@ -76,8 +72,6 @@ def cal_ewcov(data: np.matrix, lambda_: float):
     
     deviation = data - data.mean(axis=1)
     weights = exponential_weights(lambda_, data.shape[1])
-
-    # apply the weights to the deviation
     return deviation @ np.diag(weights) @ deviation.T
 
 
@@ -91,7 +85,7 @@ class PCA:
     
     def __init__(self, sigma, delta=1e-8):
         eig_vals, eig_vecs = np.linalg.eigh(sigma)
-       
+        
         # only keep positive eigen values and vectors
         is_positive = eig_vals > delta
         eig_vals = eig_vals[is_positive]  # eigen values can have very tiny imaginary parts
@@ -108,7 +102,7 @@ class PCA:
         # set the last value to 1 to eliminate rounding errors of floating point numbers
         self._cumulative_evr = self._evr.cumsum()
         self._cumulative_evr[-1] = 1
-        
+    
     @property
     def explained_variance(self):
         return self._eig_vals

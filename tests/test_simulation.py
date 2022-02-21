@@ -2,7 +2,7 @@ from unittest import TestCase, main
 
 import numpy as np
 
-from febrisk.stats import manhattan_distance
+from febrisk.statistics import manhattan_distance
 from febrisk.simulation import chol_psd
 
 
@@ -25,7 +25,9 @@ class CholPsdTest(TestCase):
                            [0.9,  0.0,  0.20647416,  0.38388595,  0.0],
                            [0.9,  0.0,  0.20647416,  0.123391911, 0.363514589]])
         self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-8)
-        
+
+
+
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 import numpy as np
 
-from febrisk.stats import manhattan_distance
+from febrisk.statistics import manhattan_distance
 from febrisk.psd import is_psd, near_psd, nearest_psd
 
 
@@ -46,7 +46,9 @@ class NearPsdTest(TestCase):
         self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-5)
     
     def test_result_is_psd(self):
-        pass
+        non_psd = a_non_psd_matrix(5)
+        result = near_psd(non_psd)
+        self.assertTrue(is_psd(result))
 
 
 class NearestPsdTest(TestCase):
@@ -63,7 +65,9 @@ class NearestPsdTest(TestCase):
         self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-5)
     
     def test_result_is_psd(self):
-        pass
+        non_psd = a_non_psd_matrix(5)
+        result = nearest_psd(non_psd)
+        self.assertTrue(is_psd(result))
 
 
 if __name__ == '__main__':

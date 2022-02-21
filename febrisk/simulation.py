@@ -3,7 +3,7 @@ from bisect import bisect_left
 import scipy
 import numpy as np
 
-from febrisk.stats import PCA
+from febrisk.statistics import PCA
 
 
 def chol_psd(sigma):
@@ -42,6 +42,10 @@ class CholeskySimulator:
         self.root = chol_psd(covariance)
     
     def simulate(self, nsample):
+        """"
+        Returns a simulated dataset that follows the normal distribution
+        with shape (# of dims, # of data)
+        """
         return self.root @ scipy.random.randn(self.root.shape[1], nsample)
 
 
@@ -67,6 +71,10 @@ class PCASimulator:
         return eig_vecs @ np.diag(np.sqrt(eig_vals))
         
     def simulate(self, nsample, explained=1, verbose=False):
+        """
+        Returns a simulated dataset that follows the normal distribution
+        with shape (# of dims, # of data).
+        """
         L = self.factorize(explained, verbose)
         Z = scipy.random.randn(L.shape[1], nsample)
         return L @ Z

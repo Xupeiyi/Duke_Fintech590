@@ -1,6 +1,6 @@
 import numpy as np
 
-from febrisk.stats import frobenius_norm
+from febrisk.statistics import frobenius_norm
 
 def is_psd(matrix, tolerance=1e-8):
     """

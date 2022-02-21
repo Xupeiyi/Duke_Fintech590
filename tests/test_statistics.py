@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn import decomposition
 
-from febrisk.stats import exponential_weights, cal_ewcov, PCA, manhattan_distance
+from febrisk.statistics import exponential_weights, cal_ewcov, PCA, manhattan_distance
 
 
 class ExponentialWeightsTest(TestCase):
