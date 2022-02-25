@@ -7,7 +7,7 @@ def VaR(data, mean, alpha: float = 0.05):
     Calculate the VaR given a 1-d array of data.
     Currently 2-d array input is not supported.
     """
-    return mean - np.quantile(data, q=alpha)
+    return mean - np.quantile(data, q=alpha, method='midpoint')
 
 
 def VaR_kde(data, mean, alpha: float = 0.05, *args, **kwargs):
@@ -29,4 +29,4 @@ def expected_shortfall(data, alpha=0.05):
     """
     sorted_data = np.sort(data)
     VaR_idx = int(alpha * sorted_data.shape[-1])
-    return np.mean(sorted_data[:VaR_idx], axis=-1)
+    return -np.mean(sorted_data[:VaR_idx], axis=-1)
