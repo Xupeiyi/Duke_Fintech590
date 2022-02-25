@@ -100,7 +100,8 @@ class CopulaSimulator:
 
         # calculate the spearman correlation between the cdfs of each variable
         sp_corr = scipy.stats.spearmanr(cdfs, axis=1)[0]
-        assert sp_corr.shape[0] == cdfs.shape[0], "The size of correlation matrix doesn't match the number of stocks"
+        assert sp_corr.shape[0] == cdfs.shape[0], \
+            "The size of correlation matrix doesn't match the number of variables"
 
         # examine sp_corr is PSD
         if not is_psd(sp_corr):
