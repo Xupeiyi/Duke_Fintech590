@@ -14,7 +14,7 @@ def is_psd(matrix, tolerance=1e-8):
     if abs(matrix - matrix.T).sum() > tolerance:
         raise ValueError("This function is for real symmetric matrices!")
     
-    eig_values, eig_vectors = np.linalg.eigh(matrix)
+    eig_values, _ = np.linalg.eigh(matrix)
     return all(eig_values > -tolerance)
 
 
