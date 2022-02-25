@@ -1,8 +1,12 @@
+from typing import List
 from bisect import bisect_left
 
 import scipy
 import numpy as np
+import pandas as pd
 
+from febrisk.psd import is_psd
+from febrisk.dist_fit import DistFitter
 from febrisk.statistics import PCA
 
 
@@ -78,3 +82,57 @@ class PCASimulator:
         L = self.factorize(explained, verbose)
         Z = scipy.random.randn(L.shape[1], nsample)
         return L @ Z
+
+
+class CopulaSimulator:
+
+    def __init__(self, dists=None, spearmanr=None):
+        if dists and spearmanr is not None:
+            assert len(dists) == spearmanr.shape[0]
+        self.dists = dists if dists is not None else []
+        self.spearmanr = spearmanr
+    
+    def _update_spearmanr(self, x):
+        # calculate cdfs' spearmanr
+        cdfs = np.empty(x.shape) 
+        for i in range(x.shape[0]):
+            cdfs[i, :] = self.dists[i].cdf(x[i, :])
+
+        # calculate the spearman correlation between the cdfs of each variable
+        sp_corr = scipy.stats.spearmanr(cdfs, axis=1)[0]
+        assert sp_corr.shape[0] == cdfs.shape[0], "The size of correlation matrix doesn't match the number of stocks"
+
+        # examine sp_corr is PSD
+        if not is_psd(sp_corr):
+            raise ValueError
+        self.spearmanr = sp_corr
+
+    def fit(self, x, fitters):
+        """
+        Find the distributions of each varaibles.
+
+        params:
+            - x: a 2D numpy arrray, each row represents a variable
+            - fitters: a list of DistFitters to fit each variable into a distribution
+        """
+        assert x.shape[0] == len(fitters), "Each variable should has its own fitter"
+
+        dists = []
+        # fit data into distributions
+        for i in range(x.shape[0]):
+            fitters[i].fit(x[i, :])
+            dists.append(fitters[i].fitted_dist)
+        self.dists = dists
+        self._update_spearmanr(x)
+
+    def simulate(self, nsample):
+        simulator = CholeskySimulator(self.spearmanr)
+        std_norm_vals = simulator.simulate(nsample)
+        std_norm_cdfs = scipy.stats.norm(loc=0, scale=1).cdf(std_norm_vals)
+
+        # for each row in standard normal cdfs, reverse them 
+        # to the actual value using correspondent distributions  
+        sim_vals = np.empty(shape=std_norm_cdfs.shape, dtype=float)
+        for i in range(sim_vals.shape[0]):
+            sim_vals[i, :] = self.dists[i].ppf(std_norm_cdfs[i, :])
+        return sim_vals
