@@ -44,7 +44,7 @@ class CopulaSimulationTest(TestCase):
         # test the simulated data has almost the same covariance
         diff = manhattan_distance(np.cov(sim_x) - np.cov(x))
         self.assertTrue(diff < 1, f"The difference between covariance matrices is {diff}")
-        self.assertAlmostEqual(0.7, np.cov(sim_x[1:, :])[0, 1], delta=3e-2)
+        self.assertAlmostEqual(0.7, np.cov(sim_x[1:, :])[0, 1], delta=1e-1)
         
         # test the marginal distribution is almost the same
         delta = 3e-1
