@@ -36,10 +36,11 @@ def near_psd(corr):
     sqrt_T = np.diagflat(np.sqrt(ts))
     sqrt_lambda = np.diag(np.sqrt(eig_vals))
     
-    root = sqrt_T @ eig_vecs @ sqrt_lambda # B = sqrt(𝑇) * S * sqrt(Λ')
+    root = sqrt_T @ eig_vecs @ sqrt_lambda  # B = sqrt(𝑇) * S * sqrt(Λ')
     near_corr = root @ root.T
-
+    
     return near_corr
+
 
 # ===================================
 # Higham's Nearest PSD
@@ -59,7 +60,7 @@ def projection_s(matrix):
     """
     eig_vals, eig_vecs = np.linalg.eigh(matrix)
     eig_vals[eig_vals < 0] = 0
-    return eig_vecs @ np.diag(eig_vals) @eig_vecs.T
+    return eig_vecs @ np.diag(eig_vals) @ eig_vecs.T
 
 
 def nearest_psd(corr, max_iter=100, tolerance=1e-9):
@@ -77,17 +78,17 @@ def nearest_psd(corr, max_iter=100, tolerance=1e-9):
     delta_s = 0
     y = corr
     prev_gamma = np.finfo(np.float64).max
-
+    
     # Loop k ∈ 1... max Iterations
     for i in range(max_iter):
-        r = y - delta_s          # Rk = Yk-1 − ΔSk-1
-        x = projection_s(r)      # Xk = Ps(Rk)
-        delta_s = x - r          # ΔSk = Xk − Rk
-        y = projection_u(x)      # Yk = Pu(Xk)
+        r = y - delta_s      # Rk = Yk-1 − ΔSk-1
+        x = projection_s(r)  # Xk = Ps(Rk)
+        delta_s = x - r      # ΔSk = Xk − Rk
+        y = projection_u(x)  # Yk = Pu(Xk)
         gamma = frobenius_norm(y - corr)
         
         # if |γk-1 − γk | < tol then break
-        if abs(gamma - prev_gamma) < tolerance:  
+        if abs(gamma - prev_gamma) < tolerance:
             break
         prev_gamma = gamma
     
