@@ -2,6 +2,7 @@ import numpy as np
 
 from febrisk.statistics import frobenius_norm
 
+
 def is_psd(matrix, tolerance=1e-8):
     """
     Examine if matrix is PSD by checking if its eigen values are all non-negative.
