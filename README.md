@@ -1,5 +1,5 @@
 # Febrisk
-Febrisk is a quantitative risk management framework that provides functions for 
+Febrisk is a quantitative risk management library that provides functions for 
 
 1. covariance estimation
 2. PSD fixes for correlation matrices
