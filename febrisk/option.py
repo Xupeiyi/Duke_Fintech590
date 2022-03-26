@@ -4,21 +4,39 @@ import scipy
 import numpy as np
 
 
-def bsm(is_call: bool, price, strike, ttm, r_f, div_rate, vol):
+def cal_d1(price, strike, ttm, carry_cost, ivol):
+    return (np.log(price/strike) + (carry_cost + 0.5*ivol**2)*ttm) / (ivol*np.sqrt(ttm))
+
+def cal_d2(d1, ivol, ttm):
+    return d1 - ivol*np.sqrt(ttm)
+
+def bsm(is_call: bool, price, strike, ttm, r_f, div_rate, ivol):
     b = r_f - div_rate  # cost of carry = risk free rate - dividend rate
     is_call = 1 if is_call else -1
     N = scipy.stats.norm(0, 1).cdf
 
-    d1 = (np.log(price/strike) + (b + 0.5*vol**2)*ttm) / (vol*np.sqrt(ttm))
-    d2 = d1 - vol*np.sqrt(ttm)
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    d2 = cal_d2(d1, ivol, ttm)
     return is_call * (price*np.e**((-div_rate)*ttm)*N(is_call*d1) - strike*np.e**(-r_f*ttm)*N(is_call*d2))
 
 
 def implied_vol(is_call: bool, price, strike, ttm, r_f, div_rate, opt_value):
-    def equation(vol):
-        return bsm(is_call, price, strike, ttm, r_f, div_rate, vol) - opt_value
-
+    def equation(ivol):
+        return bsm(is_call, price, strike, ttm, r_f, div_rate, ivol) - opt_value
     return scipy.optimize.fsolve(equation, x0=(0.5))[0]
+
+
+# ====================
+# Greeks
+# ====================
+def cal_delta(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    b = r_f - div_rate  # cost of carry = risk free rate - dividend rate
+    is_call = 0 if is_call else 1
+    N = scipy.stats.norm(0, 1).cdf
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    return np.exp((b-r_f)*ttm) * (N(d1) - is_call)
+
+
 
 # ==================
 # Binomial Trees
@@ -61,7 +79,7 @@ def bt_american_continuous_div(is_call, price, strike, ttm, r_f, div_rate, ivol,
     return option_values[0]
 
 
-def bt_american(is_call: bool, price, strike, ttm, r_f, div_rate, ivol, nperiods, dividends:List[Tuple]=None):
+def bt_american(is_call: bool, price, strike, ttm, r_f, div_rate, ivol, nperiods, dividends: List[Tuple]=None):
     """
     Caculate the value of american options by binomial tree.
     """
@@ -88,14 +106,15 @@ def bt_american(is_call: bool, price, strike, ttm, r_f, div_rate, ivol, nperiods
             curr_price = price * u**i * d**(j-i)
             value_exercise = max(0, is_call*(curr_price - strike))
             if j < div_time:
-                value_no_exercise = np.exp(-r_f*dt) * (pu*option_values[node_idx(i+1, j+1)] 
-                                                       + pd*option_values[node_idx(i, j+1)]) 
+                value_no_exercise = np.exp(-r_f*dt) * \
+                    (pu*option_values[node_idx(i+1, j+1)] + pd*option_values[node_idx(i, j+1)]) 
             else:
-                value_no_exercise = bt_american(is_call, curr_price - div_amount, strike, new_ttm, 
+                value_no_exercise = bt_american(True if is_call==1 else False, curr_price - div_amount, strike, new_ttm, 
                                                 r_f, div_rate, ivol, new_nperiods, new_dividends)
             option_values[node_idx(i, j)] = max(value_exercise, value_no_exercise)
 
     return option_values[0]
+
 
 
 if __name__ == '__main__':

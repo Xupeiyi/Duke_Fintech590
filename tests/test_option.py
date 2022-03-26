@@ -17,6 +17,7 @@ class BTAmericanTest(TestCase):
         self.assertAlmostEqual(9.183950, ans, 5)
 
     def test_result_is_correct_with_discrete_dividends(self):
+        # call
         ans = bt_american(is_call=True, price=100, strike=100, ttm=0.5,r_f=0.08, 
                           div_rate=0, ivol=0.3, nperiods=2, dividends=[(1, 1.0)])
         self.assertAlmostEqual(9.116786, ans, 5)
@@ -32,6 +33,11 @@ class BTAmericanTest(TestCase):
         ans = bt_american(is_call=True, price=100, strike=100, ttm=0.5, r_f=0.08, 
                           div_rate=0, ivol=0.3, nperiods=100, dividends=[(1, 1.0), (2, 1.0)])
         self.assertAlmostEqual(9.215344, ans, 5)
+
+        # put
+        ans = bt_american(is_call=False, price=120, strike=100, ttm=0.5,r_f=0.08, 
+                          div_rate=0, ivol=0.3, nperiods=2, dividends=[(1, 1.0)])
+        self.assertAlmostEqual(2.54262, ans, 5)
     
     def test_corner_cases(self):
         ans = bt_american(is_call=True, price=100, strike=100, ttm=0.5, r_f=0.08, 
