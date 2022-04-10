@@ -3,7 +3,7 @@ from unittest import TestCase, main
 import scipy
 import numpy as np
 
-from febrisk.statistics import manhattan_distance
+from febrisk.math import manhattan_distance
 from febrisk.dist_fit import NormalFitter, TFitter
 from febrisk.simulation import chol_psd, CopulaSimulator
 

@@ -5,9 +5,9 @@ import scipy
 import numpy as np
 import pandas as pd
 
-from febrisk.psd import is_psd
+from febrisk.math import is_psd
 from febrisk.dist_fit import DistFitter
-from febrisk.statistics import PCA
+from febrisk.math import PCA
 
 
 def chol_psd(sigma):

@@ -1,1 +1,1 @@
-from febrisk import dist_fit, performance, psd, risk, simulation, statistics, option
+from febrisk import dist_fit, performance, risk, simulation, math, option
