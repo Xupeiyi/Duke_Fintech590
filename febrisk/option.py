@@ -3,12 +3,20 @@ from typing import List, Tuple
 import scipy
 import numpy as np
 
+from febrisk.math import cal_partial_derivative
+
 
 def cal_d1(price, strike, ttm, carry_cost, ivol):
     return (np.log(price/strike) + (carry_cost + 0.5*ivol**2)*ttm) / (ivol*np.sqrt(ttm))
 
+
 def cal_d2(d1, ivol, ttm):
     return d1 - ivol*np.sqrt(ttm)
+
+
+def cal_ttm(curr_date, expire_date):
+    return (expire_date - curr_date).days / 365
+
 
 def bsm(is_call: bool, price, strike, ttm, r_f, div_rate, ivol):
     b = r_f - div_rate  # cost of carry = risk free rate - dividend rate
@@ -29,12 +37,87 @@ def implied_vol(is_call: bool, price, strike, ttm, r_f, div_rate, opt_value):
 # ====================
 # Greeks
 # ====================
-def cal_delta(is_call, price, strike, ttm, r_f, div_rate, ivol):
+
+# 1. delta
+cal_euro_delta_num = cal_partial_derivative(bsm, 1, 'price')
+
+
+def cal_euro_delta(is_call, price, strike, ttm, r_f, div_rate, ivol):
     b = r_f - div_rate  # cost of carry = risk free rate - dividend rate
     is_call = 0 if is_call else 1
     N = scipy.stats.norm(0, 1).cdf
     d1 = cal_d1(price, strike, ttm, b, ivol)
     return np.exp((b-r_f)*ttm) * (N(d1) - is_call)
+
+
+# 2. gamma
+cal_euro_gamma_num = cal_partial_derivative(bsm, 2, 'price')
+
+
+def cal_euro_gamma(price, strike, ttm, r_f, div_rate, ivol):
+    b = r_f - div_rate
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    f = scipy.stats.norm(0, 1).pdf
+    return (f(d1) * np.exp((b-r_f)*ttm)) / (price * ivol * np.sqrt(ttm))
+
+
+# 3. vega
+cal_euro_vega_num = cal_partial_derivative(bsm, 1, 'ivol')
+
+
+def cal_euro_vega(price, strike, ttm, r_f, div_rate, ivol):
+    b = r_f - div_rate
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    f = scipy.stats.norm(0, 1).pdf
+    return price * np.exp((b-r_f)*ttm)*f(d1)*np.sqrt(ttm)
+
+
+# 4. vega
+def cal_euro_theta_num(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    cal_neg_theta = cal_partial_derivative(bsm, 1, 'ttm')
+    return -1 * cal_neg_theta(is_call, price, strike, ttm, r_f, div_rate, ivol)
+
+
+def cal_euro_theta(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    is_call = 1 if is_call else -1
+    b = r_f - div_rate
+    f = scipy.stats.norm(0, 1).pdf
+    N = scipy.stats.norm(0, 1).cdf
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    d2 = cal_d2(d1, ivol, ttm)
+
+    term1 = -price * np.exp((b-r_f)*ttm) * f(d1) * ivol / (2 * np.sqrt(ttm))
+    term2 = -1 * is_call * (b - r_f) * price * np.exp((b-r_f)*ttm) * N(d1*is_call)
+    term3 = -1 * is_call * r_f * strike * np.exp(-r_f*ttm) * N(d2*is_call)
+
+    return term1 + term2 + term3
+
+
+# 5. rho
+cal_euro_rho_num = cal_partial_derivative(bsm, 1, 'r_f')
+
+
+def cal_euro_rho(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    is_call = 1 if is_call else -1
+    b = r_f - div_rate
+    N = scipy.stats.norm(0, 1).cdf
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    d2 = cal_d2(d1, ivol, ttm)
+    return is_call * ttm * strike * np.exp(-r_f*ttm)*N(is_call*d2)
+
+
+# 6. carry rho
+def cal_euro_carry_rho_num(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    cal_neg_rho = cal_partial_derivative(bsm, 1, 'div_rate')
+    return -1 * cal_neg_rho(is_call, price, strike, ttm, r_f, div_rate, ivol)
+
+
+def cal_euro_carry_rho(is_call, price, strike, ttm, r_f, div_rate, ivol):
+    is_call = 1 if is_call else -1
+    b = r_f - div_rate
+    N = scipy.stats.norm(0, 1).cdf
+    d1 = cal_d1(price, strike, ttm, b, ivol)
+    return is_call * ttm * price * np.exp((b-r_f)*ttm)*N(is_call*d1)
 
 
 
