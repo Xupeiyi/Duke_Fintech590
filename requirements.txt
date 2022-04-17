@@ -2,6 +2,7 @@ numpy
 pandas
 scipy
 statsmodels
+scikit-learn
 matplotlib
 seaborn
 pylint
