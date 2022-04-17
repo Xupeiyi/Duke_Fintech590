@@ -3,7 +3,7 @@ from unittest import TestCase, main
 import scipy
 import numpy as np
 
-from febrisk.math import manhattan_distance, test_normality
+from febrisk.math import manhattan_distance, examine_normality
 from febrisk.dist_fit import NormalFitter, TFitter
 from febrisk.simulation import chol_psd, CholeskySimulator, PCASimulator, CopulaSimulator
 
@@ -38,12 +38,11 @@ class CholeskySimulatorTest(TestCase):
         sim_cov = np.cov(sim_data)
         self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
 
-    
     def test_simulated_data_follows_normal_dist(self):
         cov = np.array([[1.3, 0.7], [0.7, 1]])
         simulator = CholeskySimulator(cov)
         sim_data = simulator.simulate(1000)
-        self.assertTrue(test_normality(sim_data))
+        self.assertTrue(examine_normality(sim_data))
 
 
 class PCASimulatorTest(TestCase):
@@ -54,13 +53,12 @@ class PCASimulatorTest(TestCase):
         sim_data = simulator.simulate(10000)
         sim_cov = np.cov(sim_data)
         self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
-
     
     def test_simulated_data_follows_normal_dist(self):
         cov = np.array([[1.3, 0.7], [0.7, 1]])
         simulator = PCASimulator(cov)
         sim_data = simulator.simulate(1000)
-        self.assertTrue(test_normality(sim_data))
+        self.assertTrue(examine_normality(sim_data))
  
 
 class CopulaSimulationTest(TestCase):

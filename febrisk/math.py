@@ -244,7 +244,7 @@ def cal_partial_derivative(f: Callable, order: int, arg_name: str, delta=1e-3) -
     return partial_derivative
 
 
-def test_normality(data, alpha=0.05):
+def examine_normality(data, alpha=0.05):
     """Examine if data is normally distributed with the Shapiro-Wilk test"""
     _, p_value = scipy.stats.shapiro(data)
     return True if p_value >= alpha else False
