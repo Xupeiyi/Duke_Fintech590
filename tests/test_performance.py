@@ -15,8 +15,8 @@ class UpdateWeightsTests(TestCase):
         weights = np.array([0.10075988181538116, 0.20950981862533438,
                             0.43839111238558587, 0.08118475735284336,
                             0.17015442982085532])
-        returns = pd.read_csv(curr_file_dir + "./UpdatedReturns.csv", header=None).values
-        ans = pd.read_csv(curr_file_dir + "./UpdatedWeights.csv", header=None).values
+        returns = pd.read_csv(curr_file_dir + "/UpdatedReturns.csv", header=None).values
+        ans = pd.read_csv(curr_file_dir + "/UpdatedWeights.csv", header=None).values
         result = update_weights(weights, returns)
         self.assertAlmostEqual(0, manhattan_distance(result - ans))
 
