@@ -49,7 +49,7 @@ class CholeskySimulator:
         Returns a simulated dataset that follows the normal distribution
         with shape (# of dims, # of data)
         """
-        return self.root @ scipy.random.randn(self.root.shape[1], nsample)
+        return self.root @ np.random.randn(self.root.shape[1], nsample)
 
 
 class PCASimulator:
@@ -79,7 +79,7 @@ class PCASimulator:
         with shape (# of dims, # of data).
         """
         principal_components = self.factorize(explained, verbose)
-        std_normal_random = scipy.random.randn(principal_components.shape[1], nsample)
+        std_normal_random = np.random.randn(principal_components.shape[1], nsample)
         return principal_components @ std_normal_random
 
 
