@@ -3,9 +3,9 @@ from unittest import TestCase, main
 import scipy
 import numpy as np
 
-from febrisk.math import manhattan_distance
+from febrisk.math import manhattan_distance, test_normality
 from febrisk.dist_fit import NormalFitter, TFitter
-from febrisk.simulation import chol_psd, CopulaSimulator
+from febrisk.simulation import chol_psd, CholeskySimulator, PCASimulator, CopulaSimulator
 
 
 def a_psd_matrix(size):
@@ -28,6 +28,40 @@ class CholPsdTest(TestCase):
                            [0.9,  0.0,  0.20647416,  0.123391911, 0.363514589]])
         self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-8)
 
+
+class CholeskySimulatorTest(TestCase):
+    
+    def test_simulated_cov_almost_equals_original_cov(self):
+        cov = np.array([[1.3, 0.7], [0.7, 1]])
+        simulator = CholeskySimulator(cov)
+        sim_data = simulator.simulate(10000)
+        sim_cov = np.cov(sim_data)
+        self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
+
+    
+    def test_simulated_data_follows_normal_dist(self):
+        cov = np.array([[1.3, 0.7], [0.7, 1]])
+        simulator = CholeskySimulator(cov)
+        sim_data = simulator.simulate(1000)
+        self.assertTrue(test_normality(sim_data))
+
+
+class PCASimulatorTest(TestCase):
+    
+    def test_simulated_cov_almost_equals_original_cov(self):
+        cov = np.array([[1.3, 0.7], [0.7, 1]])
+        simulator = PCASimulator(cov)
+        sim_data = simulator.simulate(10000)
+        sim_cov = np.cov(sim_data)
+        self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
+
+    
+    def test_simulated_data_follows_normal_dist(self):
+        cov = np.array([[1.3, 0.7], [0.7, 1]])
+        simulator = PCASimulator(cov)
+        sim_data = simulator.simulate(1000)
+        self.assertTrue(test_normality(sim_data))
+ 
 
 class CopulaSimulationTest(TestCase):
     
