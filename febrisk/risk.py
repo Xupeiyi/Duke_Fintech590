@@ -10,13 +10,13 @@ def VaR(data, mean, alpha: float = 0.05):
     return mean - np.quantile(data, q=alpha, method='midpoint')
 
 
-def VaR_kde(data, mean, alpha: float = 0.05, *args, **kwargs):
+def VaR_kde(data, mean, alpha: float = 0.05, **kwargs):
     """
     Calculate the Var based on a sequence of simulations.
     Smooth the distribution of the simulations using Gaussian KDE.
     """
-    kde = scipy.stats.gaussian_kde(data, bw_method=kwargs.get('bw_method', None), 
-                                         weights=kwargs.get('weights', None))
+    kde = scipy.stats.gaussian_kde(data, bw_method=kwargs.get('bw_method', None),
+                                   weights=kwargs.get('weights', None))
     
     def cdf_equals_alpha(upper_bound):
         return kde.integrate_box(0, upper_bound) - alpha

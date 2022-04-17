@@ -30,19 +30,22 @@ def cal_return(prices, method='arithmetic'):
 
 def update_weights(weights, returns):
     """
-    Update the weights of each asset in a portfolio given the initial weight 
-    (the weight on the starting period of the returns series) and returns in the following periods. 
+    Update the weights of each asset in a portfolio given the initial
+    weight and returns. The initial weight and returns starts at the
+    same period.
 
     params:
-        - weights: np.arrays, shape(n, 1)
+        - weights: np.arrays, shape(n,)
         - returns: np.arrays, shape(t, n)
+    return:
+        - updated_weights: np.arrays, shape(t, n)
     """
-    w = deepcopy(weights)
-    updated_weights = np.empty(shape=(returns.shape[0], len(w)), dtype=float)
+    latest_weights = deepcopy(weights)
+    updated_weights = np.empty(shape=(returns.shape[0], len(latest_weights)), dtype=float)
     
     for i in range(returns.shape[0]):
-        updated_weights[i, :] = w
-        w *= (1 + returns[i, :])
-        w /= sum(w)
+        updated_weights[i, :] = latest_weights
+        latest_weights *= (1 + returns[i, :])
+        latest_weights /= sum(latest_weights)
     
     return updated_weights

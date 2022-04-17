@@ -37,7 +37,7 @@ def manhattan_distance(arr):
 
 def frobenius_norm(matrix):
     """
-    The Frobenius Norm of matrix A is 
+    The Frobenius Norm of matrix A is
         ||𝐴|| = \sqrt{\sum_{i=1}^n \sum_{j=1}^n a_{ij}^2}.
     """
     return np.sqrt(np.square(matrix).sum())
@@ -168,23 +168,23 @@ class PCA:
     """
     Apply PCA to a n*n covariance matrix sigma.
     """
-    
+
     def __init__(self, sigma, delta=1e-8):
         eig_vals, eig_vecs = np.linalg.eigh(sigma)
-        
+
         # only keep positive eigen values and vectors
         is_positive = eig_vals > delta
         eig_vals = eig_vals[is_positive]  # eigen values can have very tiny imaginary parts
         eig_vecs = eig_vecs[:, is_positive]
-        
+
         # sort the eigen values and eigen vectors in a descending order
         desc_ranking = np.argsort(eig_vals)[::-1]
         self._eig_vals = eig_vals[desc_ranking]
         self._eig_vecs = eig_vecs[:, desc_ranking]
-        
+
         # calculate explained variance ratio (evr)
         self._evr = self._eig_vals / self._eig_vals.sum()
-        
+
         # set the last value to 1 to eliminate rounding errors of floating point numbers
         self._cumulative_evr = self._evr.cumsum()
         self._cumulative_evr[-1] = 1
@@ -192,15 +192,15 @@ class PCA:
     @property
     def explained_variance(self):
         return self._eig_vals
-    
+
     @property
     def explained_variance_ratio(self):
         return self._evr
-    
+
     @property
     def cumulative_evr(self):
         return self._cumulative_evr
-    
+
     @property
     def eig_vecs(self):
         return self._eig_vecs
@@ -220,7 +220,7 @@ def second_derivative(f, x, delta):
 def cal_partial_derivative(f: Callable, order: int, arg_name: str, delta=1e-3) -> Callable:
     """
     Return the partial derivative of a function with respect to one of its arguments.
-    
+
     params:
         - f : the original function
         - order: the order of derivative
@@ -237,7 +237,7 @@ def cal_partial_derivative(f: Callable, order: int, arg_name: str, delta=1e-3) -
         def partial_f(x):
             p_kwargs = {arg_name:x, **args_dict}
             return f(**p_kwargs)
-        
+
         return derivative_fs[order](partial_f, arg_val, delta)
 
     return partial_derivative
