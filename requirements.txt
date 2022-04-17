@@ -1,0 +1,10 @@
+numpy
+pandas
+scipy
+statsmodels
+matplotlib
+seaborn
+pylint
+pytest
+pytest-cov
+pytest-rerunfailures
