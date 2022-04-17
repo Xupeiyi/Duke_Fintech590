@@ -1,4 +1,4 @@
-name: Continuous Intergration
+name: CI
 on: [push]
 
 jobs:
