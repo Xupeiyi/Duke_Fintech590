@@ -3,10 +3,7 @@ import scipy.stats
 import scipy.optimize
 
 
-def normality(data, alpha=0.05):
-    """Examine if data is normally distributed with the Shapiro-Wilk test"""
-    _, p_value = scipy.stats.shapiro(data)
-    return True if p_value >= alpha else False
+
 
 
 class DistFitter:
@@ -33,7 +30,7 @@ class DistFitter:
         """
         return dist.logpdf(x).sum()
 
-    def dist(*args, **kwargs):
+    def dist(self, *args, **kwargs):
         """
         The distribution of x, which is to be determined.
         """
