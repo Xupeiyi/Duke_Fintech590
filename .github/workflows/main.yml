@@ -1,4 +1,4 @@
-name: Python 3.9
+name: Continuous Intergration
 on: [push]
 
 jobs:
