@@ -1,5 +1,6 @@
 import inspect
 from typing import Callable
+import scipy
 import numpy as np
 
 
@@ -112,7 +113,7 @@ def nearest_psd(corr, max_iter=100, tolerance=1e-9):
     prev_gamma = np.finfo(np.float64).max
     
     # Loop k ∈ 1... max Iterations
-    for i in range(max_iter):
+    for _ in range(max_iter):
         r = y - delta_s      # Rk = Yk-1 − ΔSk-1
         x = projection_s(r)  # Xk = Ps(Rk)
         delta_s = x - r      # ΔSk = Xk − Rk
@@ -120,7 +121,7 @@ def nearest_psd(corr, max_iter=100, tolerance=1e-9):
         gamma = frobenius_norm(y - corr)
         
         # if |γk-1 − γk | < tol then break
-        if abs(gamma - prev_gamma) < tolerance:
+        if abs(gamma - prev_gamma) < tolerance and is_psd(y):
             break
         prev_gamma = gamma
     
@@ -241,3 +242,9 @@ def cal_partial_derivative(f: Callable, order: int, arg_name: str, delta=1e-3) -
         return derivative_fs[order](partial_f, arg_val, delta)
 
     return partial_derivative
+
+
+def test_normality(data, alpha=0.05):
+    """Examine if data is normally distributed with the Shapiro-Wilk test"""
+    _, p_value = scipy.stats.shapiro(data)
+    return True if p_value >= alpha else False
