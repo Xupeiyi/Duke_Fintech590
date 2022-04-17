@@ -58,25 +58,27 @@ class TFitterTest(TestCase):
 class NormalFitterTest(TestCase):
     
     def test_parameter_estimation_is_close_to_actual_value(self):
-        loc, scale = 3, 10
+        loc, scale = 3, 6
         sim_data = scipy.stats.norm(loc=loc, scale=scale).rvs(100000)
         
         fitter = NormalFitter()
-        fitter.fit(x=sim_data, x0=(1, 1))
+        fitter.fit(x=sim_data)
         sim_loc, sim_scale = fitter.fitted_params
-        self.assertTrue(loc-0.3 < sim_loc < loc+0.3)
-        self.assertTrue(scale-0.2 < sim_scale < scale+0.2)
+        
+        delta = 0.5
+        self.assertAlmostEqual(loc, sim_loc, delta=delta)
+        self.assertAlmostEqual(scale, sim_scale, delta=delta)
         
     def test_result_is_close_to_scipy_implementation(self):
-        loc, scale = 3, 10
+        loc, scale = 3, 6
         sim_data = scipy.stats.norm(loc=loc, scale=scale).rvs(100000)
         
         fitter = NormalFitter()
-        fitter.fit(x=sim_data, x0=(1, 1))
+        fitter.fit(x=sim_data)
         sim_loc, sim_scale = fitter.fitted_params
         scipy_loc, scipy_scale = scipy.stats.norm.fit(sim_data)
         
-        delta = 5e-4
+        delta = 0.5
         self.assertAlmostEqual(scipy_loc, sim_loc, delta=delta)
         self.assertAlmostEqual(scipy_scale, sim_scale, delta=delta)
 
