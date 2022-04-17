@@ -49,3 +49,22 @@ def update_weights(weights, returns):
         latest_weights /= sum(latest_weights)
     
     return updated_weights
+
+
+def cal_return_attribution(weights, returns):
+    """
+    Calculate the return attribution of each asset in a portfolio given the initial
+    weight and returns. The initial weight and returns starts at the same period.
+
+    params:
+        - weights: np.arrays, shape(n,)
+        - returns: np.arrays, shape(t, n)
+    return:
+        - return attribution: np.arrays, shape(n,)
+    """
+    updated_weights = update_weights(weights, returns)
+    pfl_returns = (updated_weights * returns).sum(axis=1)
+    pfl_total_return = (1 + pfl_returns).prod(axis=0) - 1
+    k = np.log(1 + pfl_total_return) / pfl_total_return
+    carino_k = np.array([np.log(1 + pfl_returns) / (pfl_returns * k)]).T
+    return (returns * updated_weights * carino_k).sum(axis=0)

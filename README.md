@@ -1,4 +1,4 @@
-[![Continuous Intergration](https://github.com/Xupeiyi/Duke_Fintech590//workflows/CI/badge.svg)](https://github.com/Xupeiyi/Duke_Fintech590//workflows/CI/badge.svg)
+[![Continuous Intergration](https://github.com/Xupeiyi/Duke_Fintech590/workflows/CI/badge.svg)](https://github.com/Xupeiyi/Duke_Fintech590//workflows/CI/badge.svg)
 
 # Febrisk
 Febrisk is a quantitative risk management library that provides functions for 
