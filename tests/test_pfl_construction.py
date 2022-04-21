@@ -14,6 +14,7 @@ from febrisk.pfl_construction import (
 
 curr_file_dir = os.path.dirname(os.path.realpath(__file__))
 
+
 class BuildOptimizedPortfolioTest(TestCase):
     
     def test_result_is_correct(self):

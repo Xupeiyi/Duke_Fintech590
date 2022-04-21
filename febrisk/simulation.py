@@ -36,7 +36,7 @@ def chol_psd(sigma):
         for i in range(j+1, ncols):
             root[i, j] = (sigma[i, j] - root[i, :j] @ root[j, :j].T) / root[j, j]
 
-    return np.matrix(root)
+    return root
 
 
 class CholeskySimulator:
