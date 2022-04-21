@@ -4,7 +4,6 @@ import scipy
 import numpy as np
 
 from febrisk.math import manhattan_distance, examine_normality
-from febrisk.dist_fit import NormalFitter, TFitter
 from febrisk.simulation import chol_psd, CholeskySimulator, PCASimulator, CopulaSimulator
 
 
@@ -67,30 +66,20 @@ class CopulaSimulationTest(TestCase):
         x1 = scipy.stats.t(loc=1, df=3, scale=1.5).rvs(100000)
         x23 = scipy.stats.multivariate_normal([0.5, -0.2], [[1.3, 0.7], [0.7, 1]]).rvs(100000)
         x = np.hstack([x1[:, np.newaxis], x23])
-        cpl = CopulaSimulator()
-        fitters = [TFitter(), NormalFitter(), NormalFitter()]
-        cpl.fit(x, fitters)
+        cov = np.cov(x, rowvar=False)
+        
+        # generate simulated data
+        dists = [scipy.stats.t(loc=1, df=3, scale=1.5),
+                 scipy.stats.norm(loc=0.5, scale=1.3),
+                 scipy.stats.norm(loc=-0.2, scale=1)]
+        cpl = CopulaSimulator(x, dists)
         sim_x = cpl.simulate(100000)
+        sim_cov = np.cov(sim_x, rowvar=False)
         
         # test the simulated data has almost the same covariance
-        diff = manhattan_distance(np.cov(sim_x, rowvar=False) - np.cov(x, rowvar=False))
+        diff = manhattan_distance(sim_cov - cov)
         self.assertAlmostEqual(0, diff, delta=1)
         self.assertAlmostEqual(0.7, np.cov(sim_x[:, 1:], rowvar=False)[0, 1], delta=1e-1)
-        
-        # test the marginal distribution is almost the same
-        delta = 3e-1
-        loc, df, scale = fitters[0].fitted_params
-        self.assertAlmostEqual(1, loc, delta=delta)
-        self.assertAlmostEqual(3, df, delta=delta)
-        self.assertAlmostEqual(1.5, scale, delta=delta)
-        
-        loc, scale = fitters[1].fitted_params
-        self.assertAlmostEqual(0.5, loc, delta=1e-1)
-        self.assertAlmostEqual(1.3, scale, delta=delta)
-        
-        loc, scale = fitters[2].fitted_params
-        self.assertAlmostEqual(-0.2, loc, delta=1e-1)
-        self.assertAlmostEqual(1, scale, delta=delta)
     
     
 if __name__ == '__main__':

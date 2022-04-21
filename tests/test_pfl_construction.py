@@ -1,5 +1,6 @@
 import os
 from unittest import TestCase, main
+import scipy
 import numpy as np
 import pandas as pd
 
@@ -51,8 +52,13 @@ class BuildRiskParityPortfolioOnEsTest(TestCase):
     def test_result_is_correct(self):
         all_rets = pd.read_csv(curr_file_dir + '/DailyReturn.csv', parse_dates=['Date']).set_index('Date')
         stocks = ['AAPL', 'MSFT', 'BRK-B', 'CSCO', 'JNJ']
-        copula = CopulaSimulator()
-        copula.fit(all_rets[stocks].values, [TFitter() for _ in stocks])
+        
+        dists = []
+        for stock in stocks:
+            df, loc, scale = scipy.stats.t.fit(all_rets[stock])
+            dists.append(scipy.stats.t(df=df, loc=loc, scale=scale))
+            
+        copula = CopulaSimulator(all_rets[stocks].values, dists)
         sim_rets = copula.simulate(5000)
         result = build_risk_parity_portfolio_on_es(sim_rets)
         answer = np.array([0.149, 0.135, 0.264, 0.142, 0.310])

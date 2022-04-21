@@ -85,46 +85,24 @@ class PCASimulator:
 
 class CopulaSimulator:
 
-    def __init__(self, dists=None, spearmanr=None):
-        if dists and spearmanr is not None:
-            assert len(dists) == spearmanr.shape[0]
-        self.dists = dists if dists is not None else []
-        self.spearmanr = spearmanr
-
-    def _update_spearmanr(self, x):
-        # calculate cdfs' spearmanr
-        cdfs = np.empty(x.shape)
-        for i in range(x.shape[1]):
-            cdfs[:, i] = self.dists[i].cdf(x[:, i])
-
-        # calculate the spearman correlation between the cdfs of each variable
-        sp_corr = scipy.stats.spearmanr(cdfs, axis=0)[0]
-        assert sp_corr.shape[1] == cdfs.shape[1], \
+    def __init__(self, data, dists):
+        assert data.shape[1] == len(dists)
+        self.dists = dists
+        
+        # calculate quantiles' spearmanr
+        quantiles = np.empty(data.shape)
+        for i in range(data.shape[1]):
+            quantiles[:, i] = self.dists[i].cdf(data[:, i])
+            
+        sp_corr = scipy.stats.spearmanr(quantiles, axis=0)[0]
+        
+        assert sp_corr.shape[1] == quantiles.shape[1], \
             "The size of correlation matrix doesn't match the number of variables"
-
-        # examine sp_corr is PSD
         if not is_psd(sp_corr):
             raise ValueError("Spearman correlation matrix is not PSD!")
+        
         self.spearmanr = sp_corr
-
-    def fit(self, data, fitters: List[DistFitter]):
-        """
-        Find the distributions of each varaibles.
-
-        params:
-            - data: a 2D numpy arrray, each column represents a variable
-            - fitters: a list of DistFitters to fit each variable into a distribution
-        """
-        assert data.shape[1] == len(fitters), "Each variable should has its own fitter"
-
-        dists = []
-        # fit data into distributions
-        for i in range(data.shape[1]):
-            fitters[i].fit(data[:, i])
-            dists.append(fitters[i].fitted_dist)
-        self.dists = dists
-        self._update_spearmanr(data)
-
+        
     def simulate(self, nsample):
         simulator = CholeskySimulator(self.spearmanr)
         std_norm_vals = simulator.simulate(nsample)
