@@ -93,9 +93,7 @@ class CopulaSimulator:
         quantiles = np.empty(data.shape)
         for i in range(data.shape[1]):
             quantiles[:, i] = self.dists[i].cdf(data[:, i])
-            
         sp_corr = scipy.stats.spearmanr(quantiles, axis=0)[0]
-        
         assert sp_corr.shape[1] == quantiles.shape[1], \
             "The size of correlation matrix doesn't match the number of variables"
         if not is_psd(sp_corr):
@@ -106,11 +104,11 @@ class CopulaSimulator:
     def simulate(self, nsample):
         simulator = CholeskySimulator(self.spearmanr)
         std_norm_vals = simulator.simulate(nsample)
-        std_norm_cdfs = scipy.stats.norm(loc=0, scale=1).cdf(std_norm_vals)
+        std_norm_quantiles = scipy.stats.norm(loc=0, scale=1).cdf(std_norm_vals)
 
         # for each column in standard normal cdfs, reverse them
         # to the actual value using correspondent distributions
-        sim_vals = np.empty(shape=std_norm_cdfs.shape, dtype=float)
+        sim_vals = np.empty(shape=std_norm_quantiles.shape, dtype=float)
         for i in range(sim_vals.shape[1]):
-            sim_vals[:, i] = self.dists[i].ppf(std_norm_cdfs[:, i])
+            sim_vals[:, i] = self.dists[i].ppf(std_norm_quantiles[:, i])
         return sim_vals
