@@ -3,9 +3,6 @@ import scipy.stats
 import scipy.optimize
 
 
-
-
-
 class DistFitter:
     """
     An abstract class to fit the distribution of a random variable x
