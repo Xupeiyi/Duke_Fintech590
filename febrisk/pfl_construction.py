@@ -89,7 +89,7 @@ def cal_component_es_sse(weights, returns, budget=None, delta=1e-6):
 def build_risk_parity_portfolio_on_es(returns, budget=None):
     nassets = returns.shape[1]
     x0 = np.array([1 / nassets for _ in range(nassets)])
-    constraints = {'type':'eq', 'fun': lambda w: np.sum(w) - 1}
+    constraints = {'type': 'eq', 'fun': lambda w: np.sum(w) - 1}
     bounds = ((0, 1) for _ in range(nassets))
     results = scipy.optimize.minimize(lambda w: 1e5*cal_component_es_sse(w, returns, budget),
                                       x0=x0, bounds=bounds, constraints=constraints)

@@ -47,9 +47,9 @@ class CholeskySimulator:
     def simulate(self, nsample):
         """"
         Returns a simulated dataset that follows the normal distribution
-        with shape (# of dims, # of data)
+        with shape (# of data, # of dims)
         """
-        return self.root @ np.random.randn(self.root.shape[1], nsample)
+        return (self.root @ np.random.randn(self.root.shape[1], nsample)).T
 
 
 class PCASimulator:
@@ -76,11 +76,11 @@ class PCASimulator:
     def simulate(self, nsample, explained=1, verbose=False):
         """
         Returns a simulated dataset that follows the normal distribution
-        with shape (# of dims, # of data).
+        with shape (# of data, # of dims).
         """
         principal_components = self.factorize(explained, verbose)
         std_normal_random = np.random.randn(principal_components.shape[1], nsample)
-        return principal_components @ std_normal_random
+        return (principal_components @ std_normal_random).T
 
 
 class CopulaSimulator:
@@ -94,17 +94,17 @@ class CopulaSimulator:
     def _update_spearmanr(self, x):
         # calculate cdfs' spearmanr
         cdfs = np.empty(x.shape)
-        for i in range(x.shape[0]):
-            cdfs[i, :] = self.dists[i].cdf(x[i, :])
+        for i in range(x.shape[1]):
+            cdfs[:, i] = self.dists[i].cdf(x[:, i])
 
         # calculate the spearman correlation between the cdfs of each variable
-        sp_corr = scipy.stats.spearmanr(cdfs, axis=1)[0]
-        assert sp_corr.shape[0] == cdfs.shape[0], \
+        sp_corr = scipy.stats.spearmanr(cdfs, axis=0)[0]
+        assert sp_corr.shape[1] == cdfs.shape[1], \
             "The size of correlation matrix doesn't match the number of variables"
 
         # examine sp_corr is PSD
         if not is_psd(sp_corr):
-            raise ValueError
+            raise ValueError("Spearman correlation matrix is not PSD!")
         self.spearmanr = sp_corr
 
     def fit(self, data, fitters: List[DistFitter]):
@@ -112,15 +112,15 @@ class CopulaSimulator:
         Find the distributions of each varaibles.
 
         params:
-            - data: a 2D numpy arrray, each row represents a variable
+            - data: a 2D numpy arrray, each column represents a variable
             - fitters: a list of DistFitters to fit each variable into a distribution
         """
-        assert data.shape[0] == len(fitters), "Each variable should has its own fitter"
+        assert data.shape[1] == len(fitters), "Each variable should has its own fitter"
 
         dists = []
         # fit data into distributions
-        for i in range(data.shape[0]):
-            fitters[i].fit(data[i, :])
+        for i in range(data.shape[1]):
+            fitters[i].fit(data[:, i])
             dists.append(fitters[i].fitted_dist)
         self.dists = dists
         self._update_spearmanr(data)
@@ -130,9 +130,9 @@ class CopulaSimulator:
         std_norm_vals = simulator.simulate(nsample)
         std_norm_cdfs = scipy.stats.norm(loc=0, scale=1).cdf(std_norm_vals)
 
-        # for each row in standard normal cdfs, reverse them
+        # for each column in standard normal cdfs, reverse them
         # to the actual value using correspondent distributions
         sim_vals = np.empty(shape=std_norm_cdfs.shape, dtype=float)
-        for i in range(sim_vals.shape[0]):
-            sim_vals[i, :] = self.dists[i].ppf(std_norm_cdfs[i, :])
+        for i in range(sim_vals.shape[1]):
+            sim_vals[:, i] = self.dists[i].ppf(std_norm_cdfs[:, i])
         return sim_vals

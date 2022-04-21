@@ -51,9 +51,9 @@ class BuildRiskParityPortfolioOnEsTest(TestCase):
         all_rets = pd.read_csv(curr_file_dir + '/DailyReturn.csv', parse_dates=['Date']).set_index('Date')
         stocks = ['AAPL', 'MSFT', 'BRK-B', 'CSCO', 'JNJ']
         copula = CopulaSimulator()
-        copula.fit(all_rets[stocks].values.T, [TFitter() for _ in stocks])
+        copula.fit(all_rets[stocks].values, [TFitter() for _ in stocks])
         sim_rets = copula.simulate(5000)
-        result = build_risk_parity_portfolio_on_es(sim_rets.T)
+        result = build_risk_parity_portfolio_on_es(sim_rets)
         answer = np.array([0.149, 0.135, 0.264, 0.142, 0.310])
         self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=0.1)
         

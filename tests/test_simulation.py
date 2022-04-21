@@ -35,7 +35,7 @@ class CholeskySimulatorTest(TestCase):
         cov = np.array([[1.3, 0.7], [0.7, 1]])
         simulator = CholeskySimulator(cov)
         sim_data = simulator.simulate(10000)
-        sim_cov = np.cov(sim_data)
+        sim_cov = np.cov(sim_data, rowvar=False)
         self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
 
     def test_simulated_data_follows_normal_dist(self):
@@ -51,7 +51,7 @@ class PCASimulatorTest(TestCase):
         cov = np.array([[1.3, 0.7], [0.7, 1]])
         simulator = PCASimulator(cov)
         sim_data = simulator.simulate(10000)
-        sim_cov = np.cov(sim_data)
+        sim_cov = np.cov(sim_data, rowvar=False)
         self.assertAlmostEqual(0, manhattan_distance(cov - sim_cov), delta=0.3)
     
     def test_simulated_data_follows_normal_dist(self):
@@ -65,18 +65,17 @@ class CopulaSimulationTest(TestCase):
     
     def test_distribution_of_simulated_data_is_close_enough(self):
         x1 = scipy.stats.t(loc=1, df=3, scale=1.5).rvs(100000)
-        x23 = scipy.stats.multivariate_normal([0.5, -0.2], [[1.3, 0.7], [0.7, 1]]).rvs(100000).T
-        x = np.array([x1, x23[0, :], x23[1, :]])
-        
+        x23 = scipy.stats.multivariate_normal([0.5, -0.2], [[1.3, 0.7], [0.7, 1]]).rvs(100000)
+        x = np.hstack([x1[:, np.newaxis], x23])
         cpl = CopulaSimulator()
         fitters = [TFitter(), NormalFitter(), NormalFitter()]
         cpl.fit(x, fitters)
         sim_x = cpl.simulate(100000)
         
         # test the simulated data has almost the same covariance
-        diff = manhattan_distance(np.cov(sim_x) - np.cov(x))
-        self.assertTrue(diff < 1, f"The difference between covariance matrices is {diff}")
-        self.assertAlmostEqual(0.7, np.cov(sim_x[1:, :])[0, 1], delta=1e-1)
+        diff = manhattan_distance(np.cov(sim_x, rowvar=False) - np.cov(x, rowvar=False))
+        self.assertAlmostEqual(0, diff, delta=1)
+        self.assertAlmostEqual(0.7, np.cov(sim_x[:, 1:], rowvar=False)[0, 1], delta=1e-1)
         
         # test the marginal distribution is almost the same
         delta = 3e-1
