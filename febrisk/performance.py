@@ -52,7 +52,13 @@ def update_weights(weights, returns):
     return updated_weights
 
 
-def cal_return_attribution(weights, returns):
+def cal_carino_k(pfl_returns):
+    pfl_total_return = (1 + pfl_returns).prod(axis=0) - 1
+    k = np.log(1 + pfl_total_return) / pfl_total_return
+    return np.log(1 + pfl_returns) / (pfl_returns * k)
+    
+
+def cal_return_attribution(weighted_returns):
     """
     Calculate the return attribution of each asset in a portfolio given the initial
     weight and returns. The initial weight and returns starts at the same period.
@@ -63,17 +69,12 @@ def cal_return_attribution(weights, returns):
     return:
         - return attribution: np.arrays, shape(n,)
     """
-    assert len(weights) == returns.shape[1], \
-        "weights and returns should have the same number of columns"
-    updated_weights = update_weights(weights, returns)
-    pfl_returns = (updated_weights * returns).sum(axis=1)
-    pfl_total_return = (1 + pfl_returns).prod(axis=0) - 1
-    k = np.log(1 + pfl_total_return) / pfl_total_return
-    carino_k = np.array([np.log(1 + pfl_returns) / (pfl_returns * k)]).T
-    return (returns * updated_weights * carino_k).sum(axis=0)
+    pfl_returns = weighted_returns.sum(axis=1)
+    carino_k = cal_carino_k(pfl_returns)
+    return carino_k @ weighted_returns
 
 
-def cal_risk_attribution(weights, returns):
+def cal_risk_attribution(weighted_returns):
     """
     Calculate the risk attribution of each asset in a portfolio given the initial
     weight and returns. The initial weight and returns starts at the same period.
@@ -84,14 +85,11 @@ def cal_risk_attribution(weights, returns):
     return:
         - risk attribution: np.arrays, shape(n,)
     """
-    assert len(weights) == returns.shape[1], \
-        "weights and returns should have the same number of columns"
-    updated_weights = update_weights(weights, returns)
-    weighted_returns = (updated_weights * returns)
+    
     pfl_returns = weighted_returns.sum(axis=1)
     pfl_risk = pfl_returns.std()
     
-    nassets = len(weights)
+    nassets = weighted_returns.shape[1]
     risk_attribution = np.empty(nassets, dtype=float)
     for i in range(nassets):
         # calculate betas
