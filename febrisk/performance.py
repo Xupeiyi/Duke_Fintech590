@@ -60,12 +60,10 @@ def cal_carino_k(pfl_returns):
 
 def cal_return_attribution(weighted_returns):
     """
-    Calculate the return attribution of each asset in a portfolio given the initial
-    weight and returns. The initial weight and returns starts at the same period.
+    Calculate the return attribution of each asset in a portfolio given the weighted returns.
 
     params:
-        - weights: np.arrays, shape(n,)
-        - returns: np.arrays, shape(t, n)
+        - weighted_returns: 2-d np.arrays, shape(nperiods, nassets)
     return:
         - return attribution: np.arrays, shape(n,)
     """
@@ -76,12 +74,10 @@ def cal_return_attribution(weighted_returns):
 
 def cal_risk_attribution(weighted_returns):
     """
-    Calculate the risk attribution of each asset in a portfolio given the initial
-    weight and returns. The initial weight and returns starts at the same period.
+    Calculate the risk attribution of each asset in a portfolio given the weighted returns.
 
     params:
-        - weights: np.arrays, shape(n,)
-        - returns: np.arrays, shape(t, n)
+        - weighted_returns: 2-d np.arrays, shape(nperiods, nassets)
     return:
         - risk attribution: np.arrays, shape(n,)
     """
