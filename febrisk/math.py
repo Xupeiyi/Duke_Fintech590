@@ -29,6 +29,35 @@ def cal_cov(corr, std):
     return std @ corr @ std
 
 
+# =================================
+# Exponentially Weighted Covariance
+# =================================
+def exponential_weights(lambda_: float, nlags: int) -> np.array:
+    """
+    Calculate the weights from T = t-nlags to t-1 if current period is T = t.
+    """
+    weights = np.array([(1 - lambda_) * (lambda_ ** (lag - 1)) for lag in range(nlags, 0, -1)])
+    weights /= weights.sum()  # normalized weights
+    return weights
+
+
+def cal_ewcov(data: np.matrix, lambda_: float):
+    """
+    Calculate the exponentially weighted covariance of a dataset matrix.
+    Equation:
+
+        \sigma_t^2 = (1 − \lambda) \sum_{i=1}^{\infty}{\lambda^{i-1} (x_{t-i} - \bar{x})^2}
+
+    params:
+        - data: 2-d np.array of shape(#periods, #variables).
+                Data is ranked on an ascending time order on axis 0.
+        - lambda_: to put how much weight on t-1's forecast variance
+    """
+    deviation = data - data.mean(axis=0)
+    weights = exponential_weights(lambda_, data.shape[0])
+    return deviation.T @ np.diag(weights) @ deviation
+
+
 # ==================================
 # PSD
 # ==================================
@@ -47,7 +76,7 @@ def frobenius_norm(matrix):
 def is_psd(matrix, tolerance=1e-8):
     """
     Examine if matrix is PSD by checking if its eigen values are all non-negative.
-    
+
     params:
         - matrix: a real symmetric matrix.
         - tolerance
@@ -55,7 +84,7 @@ def is_psd(matrix, tolerance=1e-8):
     # examine if a matrix is real symmetric
     if abs(matrix - matrix.T).sum() > tolerance:
         raise ValueError("This function is for real symmetric matrices!")
-    
+
     eig_values, _ = np.linalg.eigh(matrix)
     return all(eig_values > -tolerance)
 
@@ -126,40 +155,6 @@ def nearest_psd(corr, max_iter=100, tolerance=1e-9):
         prev_gamma = gamma
     
     return y
-
-
-# =================================
-# Exponentially Weighted Covariance
-# =================================
-def exponential_weights(lambda_: float, nlags: int) -> np.array:
-    """
-    Calculate the weights from T = t-1 to t-nlags if current period is T = t.
-    """
-    weights = np.array([(1 - lambda_) * (lambda_ ** (lag - 1)) for lag in range(1, nlags + 1)])
-    weights /= weights.sum()  # normalized weights
-    return weights
-
-
-def cal_ewcov(data: np.matrix, lambda_: float):
-    """
-    Calculate the exponentially weighted covariance of a dataset matrix.
-    Equation:
-    
-        \sigma_t^2 = (1 − \lambda) \sum_{i=1}^{\infty}{\lambda^{i-1} (x_{t-i} - \bar{x})^2}
-    
-    params:
-        - data: The dataset has n observations(ordered from the most recent to the least recent ) 
-                on m varaibles. Can be denoted as [[x1_t-1, x1_t-2, ...., x1_t-n],
-                                                    ...,
-                                                   [xm_t-1, xm_t-2, ...., xm_t-n]].
-                The dataset should be an instance of np.matrix (but not np.array). 
-        
-        - lambda_: to put how much weight on t-1's forecast variance
-    """
-    
-    deviation = data - data.mean(axis=1)
-    weights = exponential_weights(lambda_, data.shape[1])
-    return deviation @ np.diag(weights) @ deviation.T
 
 
 # ===========================================
@@ -247,4 +242,4 @@ def cal_partial_derivative(f: Callable, order: int, arg_name: str, delta=1e-3) -
 def examine_normality(data, alpha=0.05):
     """Examine if data is normally distributed with the Shapiro-Wilk test"""
     _, p_value = scipy.stats.shapiro(data)
-    return True if p_value >= alpha else False
+    return p_value >= alpha

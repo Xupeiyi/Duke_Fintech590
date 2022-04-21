@@ -17,21 +17,23 @@ class ExponentialWeightsTest(TestCase):
     
     def test_result_is_correct(self):
         results = exponential_weights(0.97, 4)
-        answer = [0.26153548, 0.25368942, 0.24607873, 0.23869637]
-        difference = (results - answer).sum()
-        self.assertAlmostEqual(0, difference, delta=1e-8)
+        answer = np.array([0.23869637, 0.24607873, 0.25368942, 0.26153548])
+        self.assertAlmostEqual(0, manhattan_distance(results - answer), delta=1e-8)
 
 
 class CalEwcovTest(TestCase):
 
     def test_result_is_the_same_with_lecture_code(self):
-        daily_return = pd.read_csv(curr_file_dir + "/DailyReturn.csv").iloc[::-1, 1:].T
-        daily_return = np.matrix(daily_return)
-        result = cal_ewcov(daily_return, 0.97)
-        
-        answer = pd.read_csv(curr_file_dir + "/DailyReturnEwCov.csv")
-        difference = (result - answer.values).sum()
-        self.assertAlmostEqual(0, difference, delta=1e-8)
+        daily_returns = pd.read_csv(curr_file_dir + "/DailyReturn.csv").set_index('Date').values
+        result = cal_ewcov(daily_returns, 0.97)
+        answer = pd.read_csv(curr_file_dir + "/DailyReturnEwCov.csv").values
+        self.assertAlmostEqual(0, manhattan_distance(result - answer), delta=1e-8)
+    
+    def test_can_be_used_on_1d_array(self):
+        daily_returns = pd.read_csv(curr_file_dir + "/DailyReturn.csv").set_index('Date')['AAPL'].values
+        result = cal_ewcov(daily_returns, 0.97)
+        answer = 0.00026875230284538243
+        self.assertAlmostEqual(answer, result, delta=1e-8)
     
     
 class PCATest(TestCase):
